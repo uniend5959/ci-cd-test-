@@ -19,4 +19,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: hello world
-        run: echo 'hello wold'
+        run: echo 'hello wold' #cli 명령어,   echo : 리눅스 명령, 변수출력 하는 역할, 리눅스 명령어 쓸때는 run
+
+      # uses: npm install, import, require처럼, "미리 만들어진 기능을 가져와서 사용하겠다"
+      # Action(도구)들이 있습니다. 코드를 압축하는 도구, 클라우드에 배포하는 도구, 슬랙으로 알림을 보내는 도구
+      # 'actions/checkout@v4'는 GitHub에서 공식적으로 제공하는 'checkout'이라는 Action의 4버전을 사용하겠다는 뜻입니다
+      #  그 중 checkout 은 현재 워크플로우가 실행되고 있는 레포지토리의 소스 코드를 가상 머신으로 복제(git clone)하는 것
+      # 내 레포지토리 코드가 워크플로우 실행 환경에 다운로드 되는것
+      - name: Checkout Code
+        uses: actions/checkout@v4 # actions : 재사용 가능한, 반복되는 작업들을 npm처럼
+
+      # package-lock.json 파일을 기반으로 프로젝트 의존성(dependency)들을 빠르고 안정적으로 설치하는 단계입니다.
+      # 'deps'는 'dependencies'(의존성)의 줄임말
+      - name: install deps
+        run: npm ci # ci
