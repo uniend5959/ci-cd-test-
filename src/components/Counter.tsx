@@ -31,7 +31,7 @@ export default function Counter({ initialValue = 0, title = "Counter" }: Counter
           className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
           data-testid="reset-button"
         >
-          Reset
+          리셋버튼 
         </button>
         <button
           onClick={increment}
