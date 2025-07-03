@@ -1,5 +1,7 @@
 name: context ci
-on: push
+on:
+  push:
+
 jobs:
   basicContext:
     runs-on: ubuntu-latest
