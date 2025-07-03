@@ -12,9 +12,38 @@
 # 3. npm start?
 
 name: first workflow
-on: push
+on:
+  push:
+    #  src 경로에 있을때만 이벤트 발생하도록
+    paths: "src/**"
+  pull_request:
+    branches: "main"
+    types: [closed]
+  workflow_dispatch:
+
 jobs:
   # job의 이름
+
+  echo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: hello world
+        run: echo "${{ toJson(github) }}"
+
+      - name: 메인 브런치에만 실행되는 step
+        if: github.ref_name == 'main'
+        run: echo ' 메인 브런치 ${{ github.ref_name}} ' #로그남기기
+
+  event:
+    runs-on: ubuntu-latest
+    steps:
+      - name: push 이벤트
+        if: github.event_name == 'push'
+        run: echo `메인 브런치 ${{ toJson(github.event)}}
+
+      - name: pull rq 이벤트
+        if: github.event_name == ' pull_request'
+        run: echo `풀 리퀘 브런치 ${{ toJson(github.event)}}
 
   lint:
     runs-on: ubuntu-latest
