@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: pr시 처리동작
-        if: github.event_name == 'pull_request'
+
         run: |
           echo 'pr 제목 :${{ github.event.pull_request.title }}'
           echo 'pr 번호 :${{ github.event.pull_request.number }}'
