@@ -1,0 +1,142 @@
+name: 02. Basic CI Demo
+
+# 이벤트 정의 - 언제 워크플로우가 실행될지
+on: [push, workflow_dispatch] # 수동 실행 가능
+
+# 전역 환경변수 설정
+env:
+  NODE_ENV: production
+  PROJECT_NAME: "GitHub Actions CI Demo"
+
+# 작업들 정의
+jobs:
+  # 첫 번째 작업: 코드 체크아웃 및 의존성 설치
+  setup:
+    name: 환경 설정
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: 코드 체크아웃
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Node.js 설정
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      # Step 3: 의존성 설치
+      - name: Install dependencies
+        run: npm ci
+
+      # Step 4: 설치 확인
+      - name: Check installed packages
+        run: |
+          echo "=== 설치된 패키지 확인 ==="
+          echo "Node.js 버전: $(node --version)"
+          echo "npm 버전: $(npm --version)"
+          echo "설치된 패키지 수: $(npm list --depth=0 | wc -l)"
+
+  # 두 번째 작업: 코드 검사
+  lint:
+    name: 코드 검사
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ESLint 실행
+      - name: Run ESLint
+        run: npm run lint
+
+  # 세 번째 작업: 테스트 실행
+  test:
+    name: 테스트 실행
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # 테스트 실행
+      - name: Run tests
+        run: npm test
+
+      # 테스트 커버리지 확인
+      - name: Check test coverage
+        run: npm run test:coverage
+
+  # 네 번째 작업: 빌드
+  build:
+    name: 빌드
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # 빌드 실행
+      - name: Build application
+        run: npm run build
+
+      # 빌드 결과 확인
+      - name: Check build output
+        run: |
+          echo "=== 빌드 결과 확인 ==="
+          echo "빌드된 파일들:"
+          ls -la dist/
+          echo "빌드 크기:"
+          du -sh dist/
+
+  # 다섯 번째 작업: CI 결과 요약
+  summary:
+    name: CI 결과 요약
+    runs-on: ubuntu-latest
+    needs: [lint, test, build]
+
+    steps:
+      - name: Generate CI summary
+        run: |
+          echo "🎉 CI 파이프라인이 성공적으로 완료되었습니다!"
+          echo ""
+          echo "=== 실행된 작업들 ==="
+          echo "✅ 환경 설정: Node.js 설정 및 의존성 설치"
+          echo "✅ 코드 검사: ESLint"
+          echo "✅ 테스트 실행: 단위 테스트 및 커버리지 확인"
+          echo ""
+          echo "=== 다음 단계 ==="
+          echo "🚀 배포 파이프라인으로 진행하거나"
+          echo "📋 코드 리뷰를 진행하세요!"

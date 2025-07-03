@@ -1,0 +1,171 @@
+name: 04. Context Variables Demo
+
+# 간단한 이벤트 설정
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # 1. 기본 Context 변수 알아보기
+  basic-context:
+    name: 기본 Context 변수
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: GitHub Context 출력하기
+        run: |
+          echo "=== GitHub Context 변수들 ==="
+          echo "저장소 이름: ${{ github.repository }}"
+          echo "브랜치 이름: ${{ github.ref_name }}"
+          echo "커밋 해시: ${{ github.sha }}"
+          echo "이벤트 타입: ${{ github.event_name }}"
+          echo "실행자: ${{ github.actor }}"
+
+      - name: Runner Context 출력하기
+        run: |
+          echo "=== Runner Context 변수들 ==="
+          echo "운영체제: ${{ runner.os }}"
+          echo "작업 디렉토리: ${{ runner.workspace }}"
+
+  # 2. 브랜치별 다른 동작하기
+  branch-specific:
+    name: 브랜치별 동작
+    runs-on: ubuntu-latest
+    needs: basic-context
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Main 브랜치 작업
+        if: github.ref_name == 'main'
+        run: |
+          echo "🎯 Main 브랜치에서 실행 중"
+          echo "이곳에서는 배포 작업을 합니다"
+
+      - name: Develop 브랜치 작업
+        if: github.ref_name == 'develop'
+        run: |
+          echo "🔧 Develop 브랜치에서 실행 중"
+          echo "이곳에서는 테스트 작업을 합니다"
+
+      - name: 다른 브랜치 작업
+        if: github.ref_name != 'main' && github.ref_name != 'develop'
+        run: |
+          echo "🚀 ${{ github.ref_name }} 브랜치에서 실행 중"
+          echo "이곳에서는 개발 작업을 합니다"
+
+  # 3. 이벤트별 다른 동작하기
+  event-specific:
+    name: 이벤트별 동작
+    runs-on: ubuntu-latest
+    needs: basic-context
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Push 이벤트 처리
+        if: github.event_name == 'push'
+        run: |
+          echo "📤 Push 이벤트가 발생했습니다"
+          echo "커밋 메시지: ${{ github.event.head_commit.message }}"
+
+      - name: Pull Request 이벤트 처리
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "📝 Pull Request 이벤트가 발생했습니다"
+          echo "PR 제목: ${{ github.event.pull_request.title }}"
+          echo "PR 번호: ${{ github.event.pull_request.number }}"
+
+      - name: 수동 실행 처리
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "👆 수동으로 실행했습니다"
+          echo "실행자: ${{ github.actor }}"
+
+  # 4. Steps Context 사용하기
+  steps-context:
+    name: Steps Context 사용
+    runs-on: ubuntu-latest
+    needs: basic-context
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: 정보 생성하기
+        id: build_info
+        run: |
+          echo "build_time=$(date)" >> $GITHUB_OUTPUT
+          echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          echo "commit=${{ github.sha }}" >> $GITHUB_OUTPUT
+
+      - name: 생성된 정보 사용하기
+        run: |
+          echo "=== 생성된 정보 ==="
+          echo "빌드 시간: ${{ steps.build_info.outputs.build_time }}"
+          echo "브랜치: ${{ steps.build_info.outputs.branch }}"
+          echo "커밋: ${{ steps.build_info.outputs.commit }}"
+
+  # 6. 조건부 실행 연습
+  conditional-execution:
+    name: 조건부 실행 연습
+    runs-on: ubuntu-latest
+    needs: [basic-context, branch-specific, event-specific]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Main 브랜치 + Push 이벤트
+        if: github.ref_name == 'main' && github.event_name == 'push'
+        run: |
+          echo "🚀 Main 브랜치에 푸시되었습니다!"
+          echo "배포를 시작합니다..."
+
+      - name: Develop 브랜치 + Push 이벤트
+        if: github.ref_name == 'develop' && github.event_name == 'push'
+        run: |
+          echo "🔧 Develop 브랜치에 푸시되었습니다!"
+          echo "테스트를 시작합니다..."
+
+      - name: Pull Request 이벤트
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "📝 Pull Request가 생성되었습니다!"
+          echo "코드 리뷰를 시작합니다..."
+
+  # 6. 요약
+  summary:
+    name: Context Variables 요약
+    runs-on: ubuntu-latest
+    needs: [basic-context, branch-specific, event-specific, steps-context, conditional-execution]
+    # if: always() - 다른 job들이 실패해도 항상 실행되도록 하는 조건
+    if: always()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: 학습한 Context 변수들
+        run: |
+          echo "=== 오늘 학습한 Context 변수들 ==="
+          echo "1. github.repository - 저장소 이름"
+          echo "2. github.ref_name - 브랜치 이름"
+          echo "3. github.sha - 커밋 해시"
+          echo "4. github.event_name - 이벤트 타입"
+          echo "5. github.actor - 실행자"
+          echo "6. steps.{id}.outputs.{name} - 단계 간 데이터 전달"
+          echo ""
+          echo "=== 현재 실행 정보 ==="
+          echo "저장소: ${{ github.repository }}"
+          echo "브랜치: ${{ github.ref_name }}"
+          echo "이벤트: ${{ github.event_name }}"
+          echo "실행자: ${{ github.actor }}"

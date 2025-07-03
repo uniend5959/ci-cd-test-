@@ -1,0 +1,430 @@
+# Event Filters와 Activity Types 실습 정답
+
+# 실습 1: Push 이벤트 필터링
+name: Push Event Filtering
+
+on:
+  push:
+    paths:
+      - "src/**" # src 폴더의 모든 파일 변경 시에만 실행
+    branches:
+      - main
+      - develop
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Test results
+        run: echo "Tests completed for src changes on ${{ github.ref }}"
+
+---
+# 실습 2: Pull Request Activity Types
+name: Pull Request Activity Types
+
+on:
+  pull_request:
+    types: [opened, synchronize, closed]
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Test results
+        run: echo "Tests completed for PR ${{ github.event.action }}"
+
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cleanup temporary files
+        run: |
+          echo "Cleaning up temporary files for closed PR"
+          # 여기에 실제 정리 작업 추가
+          echo "Cleanup completed"
+
+---
+# 실습 3: 경로별 다른 워크플로우 - 프론트엔드
+name: Frontend Changes
+
+on:
+  push:
+    paths:
+      - "src/frontend/**"
+      - "public/**"
+      - "next.config.js"
+    branches: [main, develop]
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run frontend tests
+        run: npm test -- --testPathPattern=frontend
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: .next/
+
+---
+# 실습 3: 경로별 다른 워크플로우 - 백엔드
+name: Backend Changes
+
+on:
+  push:
+    paths:
+      - "src/backend/**"
+      - "package.json"
+    branches: [main, develop]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run backend tests
+        run: npm test -- --testPathPattern=backend
+
+      - name: Security scan
+        run: |
+          echo "Running security scan for backend changes"
+          # 여기에 실제 보안 스캔 명령어 추가
+
+---
+# 실습 3: 경로별 다른 워크플로우 - 설정 파일
+name: Config Changes
+
+on:
+  push:
+    paths:
+      - "config/**"
+      - "*.config.js"
+      - "*.config.ts"
+    branches: [main, develop]
+
+jobs:
+  config:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate configuration
+        run: |
+          echo "Validating configuration files"
+          # 여기에 설정 파일 검증 로직 추가
+
+---
+# 실습 4: 브랜치별 다른 워크플로우 - Feature 브랜치
+name: Feature Branch Workflow
+
+on:
+  push:
+    branches: ["feature/*"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+---
+# 실습 4: 브랜치별 다른 워크플로우 - Develop 브랜치
+name: Develop Branch Workflow
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-develop
+          path: .next/
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to staging
+        run: |
+          echo "Deploying to staging environment"
+          # 여기에 스테이징 배포 로직 추가
+
+---
+# 실습 4: 브랜치별 다른 워크플로우 - Main 브랜치
+name: Main Branch Workflow
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-main
+          path: .next/
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to production
+        run: |
+          echo "Deploying to production environment"
+          # 여기에 프로덕션 배포 로직 추가
+
+---
+# 실습 5: 수동 실행 워크플로우
+name: Manual Deployment
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Deploy application
+        run: |
+          echo "Deploying application"
+          # 여기에 실제 배포 로직 추가
+
+---
+# 도전 과제 1: 스케줄링 워크플로우
+name: Scheduled Maintenance
+
+on:
+  schedule:
+    - cron: "0 2 * * 0" # 매주 일요일 새벽 2시
+
+jobs:
+  maintenance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Daily maintenance
+        run: |
+          echo "Running daily maintenance tasks"
+          # 여기에 일일 유지보수 작업 추가
+
+---
+# 도전 과제 2: 복합 이벤트 워크플로우
+name: Combined Event Workflow
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+---
+# 도전 과제 3: 파일 확장자 필터링
+name: File Extension Filtering
+
+on:
+  push:
+    paths:
+      - "**/*.js"
+      - "**/*.ts"
+      - "**/*.jsx"
+      - "**/*.tsx"
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Lint code
+        run: npm run lint

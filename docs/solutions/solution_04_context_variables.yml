@@ -1,0 +1,96 @@
+name: GitHub Actions Context Variables (프론트엔드 핵심)
+
+on:
+  push:
+    branches: [main, develop, feature/*]
+  pull_request:
+    branches: [main]
+
+jobs:
+  context-demo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Display GitHub Context
+        run: |
+          echo "=== GitHub Context ==="
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Event: ${{ github.event_name }}"
+          echo "Actor: ${{ github.actor }}"
+
+      - name: Production deployment preparation
+        if: github.ref_name == 'main'
+        run: |
+          echo "=== Branch-specific Action ==="
+          echo "Production 배포 준비"
+          echo "Branch: ${{ github.ref_name }}"
+
+      - name: Staging deployment preparation
+        if: github.ref_name == 'develop'
+        run: |
+          echo "=== Branch-specific Action ==="
+          echo "Staging 배포 준비"
+          echo "Branch: ${{ github.ref_name }}"
+
+      - name: Feature testing preparation
+        if: startsWith(github.ref_name, 'feature/')
+        run: |
+          echo "=== Branch-specific Action ==="
+          echo "Feature 테스트 준비"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Feature name: ${{ github.ref_name }}"
+
+      - name: Handle Pull Request
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "=== Pull Request Info ==="
+          echo "PR Title: ${{ github.event.pull_request.title }}"
+          echo "PR Number: ${{ github.event.pull_request.number }}"
+          echo "PR Author: ${{ github.event.pull_request.user.login }}"
+          echo "PR State: ${{ github.event.pull_request.state }}"
+
+      - name: Generate build info
+        id: build_info
+        run: |
+          echo "build_id=$(date +%s)" >> $GITHUB_OUTPUT
+          echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          echo "commit=${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "event=${{ github.event_name }}" >> $GITHUB_OUTPUT
+
+      - name: Use build info
+        run: |
+          echo "=== Build Info ==="
+          echo "Build ID: ${{ steps.build_info.outputs.build_id }}"
+          echo "Branch: ${{ steps.build_info.outputs.branch }}"
+          echo "Commit: ${{ steps.build_info.outputs.commit }}"
+          echo "Event: ${{ steps.build_info.outputs.event }}"
+
+      - name: Context in environment variables
+        env:
+          REPO_NAME: "${{ github.repository }}"
+          BRANCH_NAME: "${{ github.ref_name }}"
+          COMMIT_SHA: "${{ github.sha }}"
+          USER_NAME: "${{ github.actor }}"
+          EVENT_TYPE: "${{ github.event_name }}"
+        run: |
+          echo "=== Environment Variables ==="
+          echo "Repository: $REPO_NAME"
+          echo "Branch: $BRANCH_NAME"
+          echo "Commit: $COMMIT_SHA"
+          echo "User: $USER_NAME"
+          echo "Event: $EVENT_TYPE"
+
+      - name: Create summary
+        run: |
+          echo "=== Summary ==="
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Event: ${{ github.event_name }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Build ID: ${{ steps.build_info.outputs.build_id }}"

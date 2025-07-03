@@ -1,0 +1,136 @@
+name: Environment Variables Exercise
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  # 워크플로우 레벨 환경 변수
+  WORKFLOW_ENV: "workflow-level-variable"
+  APP_VERSION: "1.0.0"
+
+jobs:
+  environment-variables-demo:
+    runs-on: ubuntu-latest
+
+    env:
+      # 작업 레벨 환경 변수
+      JOB_ENV: "job-level-variable"
+      NODE_ENV: "production"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Display GitHub context variables
+        run: |
+          echo "=== GitHub Context Variables ==="
+          echo "Repository: ${{ github.repository }}"
+          echo "SHA: ${{ github.sha }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Event: ${{ github.event_name }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Run ID: ${{ github.run_id }}"
+          echo "Run Number: ${{ github.run_number }}"
+
+      - name: Display workflow level environment variables
+        run: |
+          echo "=== Workflow Level Environment Variables ==="
+          echo "WORKFLOW_ENV: ${{ env.WORKFLOW_ENV }}"
+          echo "APP_VERSION: ${{ env.APP_VERSION }}"
+
+      - name: Display job level environment variables
+        run: |
+          echo "=== Job Level Environment Variables ==="
+          echo "JOB_ENV: ${{ env.JOB_ENV }}"
+          echo "NODE_ENV: ${{ env.NODE_ENV }}"
+
+      - name: Set and display step level environment variables
+        env:
+          # 단계 레벨 환경 변수
+          STEP_ENV: "step-level-variable"
+          TIMESTAMP: ${{ github.event.head_commit.timestamp }}
+        run: |
+          echo "=== Step Level Environment Variables ==="
+          echo "STEP_ENV: ${{ env.STEP_ENV }}"
+          echo "TIMESTAMP: ${{ env.TIMESTAMP }}"
+
+      - name: Display all environment variables
+        run: |
+          echo "=== All Environment Variables ==="
+          env | sort
+
+      - name: Conditional environment variables for main branch
+        if: github.ref == 'refs/heads/main'
+        env:
+          ENVIRONMENT: "PRODUCTION"
+          API_URL: "https://api.production.com"
+          LOG_LEVEL: "error"
+        run: |
+          echo "=== Main Branch Environment ==="
+          echo "ENVIRONMENT: ${{ env.ENVIRONMENT }}"
+          echo "API_URL: ${{ env.API_URL }}"
+          echo "LOG_LEVEL: ${{ env.LOG_LEVEL }}"
+
+      - name: Conditional environment variables for develop branch
+        if: github.ref == 'refs/heads/develop'
+        env:
+          ENVIRONMENT: "DEVELOPMENT"
+          API_URL: "https://api.development.com"
+          LOG_LEVEL: "debug"
+        run: |
+          echo "=== Develop Branch Environment ==="
+          echo "ENVIRONMENT: ${{ env.ENVIRONMENT }}"
+          echo "API_URL: ${{ env.API_URL }}"
+          echo "LOG_LEVEL: ${{ env.LOG_LEVEL }}"
+
+      - name: Use secrets (simulated)
+        run: |
+          echo "=== Secrets Usage ==="
+          echo "Database URL: ${{ secrets.DATABASE_URL || '***MASKED***' }}"
+          echo "API Key: ${{ secrets.API_KEY || '***MASKED***' }}"
+          echo "JWT Secret: ${{ secrets.JWT_SECRET || '***MASKED***' }}"
+
+      - name: Environment-specific deployment
+        run: |
+          echo "=== Environment Specific Deployment ==="
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "Deploying to PRODUCTION environment"
+            echo "Using production configuration"
+          elif [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+            echo "Deploying to DEVELOPMENT environment"
+            echo "Using development configuration"
+          else
+            echo "Deploying to TEST environment"
+            echo "Using test configuration"
+          fi
+
+      - name: Create environment summary
+        run: |
+          echo "=== Environment Summary ==="
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Author: ${{ github.actor }}"
+          echo "Event: ${{ github.event_name }}"
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Run ID: ${{ github.run_id }}"
+          echo "Run Number: ${{ github.run_number }}"
+
+          # 환경별 설정 출력
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "Environment: PRODUCTION"
+            echo "API URL: https://api.production.com"
+            echo "Log Level: error"
+          elif [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+            echo "Environment: DEVELOPMENT"
+            echo "API URL: https://api.development.com"
+            echo "Log Level: debug"
+          else
+            echo "Environment: TEST"
+            echo "API URL: https://api.test.com"
+            echo "Log Level: info"
+          fi

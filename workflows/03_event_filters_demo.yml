@@ -1,0 +1,177 @@
+name: 03. Event Filters Demo
+
+# 다양한 이벤트 필터 예제들
+on:
+  # 1. 기본 push 이벤트 (모든 브랜치)
+  push:
+    branches: [main, develop, feature/*]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "package.json"
+      - "package-lock.json"
+      - "!docs/**" # docs 폴더는 제외
+
+  # 2. Pull Request 이벤트
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened, closed]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "package.json"
+
+  # 3. 수동 실행 (workflow_dispatch)
+  workflow_dispatch:
+
+jobs:
+  # 1. 이벤트 정보 출력
+  event-info:
+    name: 이벤트 정보 출력
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Display event information
+        run: |
+          echo "=== 이벤트 정보 ==="
+          echo "이벤트 타입: ${{ github.event_name }}"
+          echo "브랜치: ${{ github.ref_name }}"
+          echo "커밋: ${{ github.sha }}"
+          echo "실행자: ${{ github.actor }}"
+          echo "워크플로우: ${{ github.workflow }}"
+          echo "실행 ID: ${{ github.run_id }}"
+
+      # Pull Request 정보 출력
+      - name: Display PR information
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "=== Pull Request 정보 ==="
+          echo "PR 번호: ${{ github.event.pull_request.number }}"
+          echo "PR 제목: ${{ github.event.pull_request.title }}"
+          echo "PR 상태: ${{ github.event.pull_request.state }}"
+          echo "PR 작성자: ${{ github.event.pull_request.user.login }}"
+          echo "PR 액션: ${{ github.event.action }}"
+
+      # Workflow Dispatch 정보 출력
+      - name: Display workflow dispatch info
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "=== 수동 실행 정보 ==="
+          echo "수동 실행됨"
+          echo "실행자: ${{ github.actor }}"
+
+  # 2. 브랜치별 다른 동작
+  branch-specific:
+    name: 브랜치별 동작
+    runs-on: ubuntu-latest
+    needs: event-info
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # main 브랜치 전용
+      - name: Main branch actions
+        if: github.ref_name == 'main'
+        run: |
+          echo "🎯 Main 브랜치 전용 작업"
+          echo "환경: PRODUCTION"
+          echo "배포 준비 중..."
+
+      # develop 브랜치 전용
+      - name: Develop branch actions
+        if: github.ref_name == 'develop'
+        run: |
+          echo "🔧 Develop 브랜치 전용 작업"
+          echo "환경: STAGING"
+          echo "스테이징 환경 배포 준비 중..."
+
+      # feature 브랜치 전용
+      - name: Feature branch actions
+        if: startsWith(github.ref_name, 'feature/')
+        run: |
+          echo "🚀 Feature 브랜치 전용 작업"
+          echo "환경: FEATURE"
+          echo "기능: ${{ github.ref_name }}"
+          echo "개발 환경 테스트 중..."
+
+  # 3. 이벤트 타입별 처리
+  event-type-handling:
+    name: 이벤트 타입별 처리
+    runs-on: ubuntu-latest
+    needs: event-info
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Push 이벤트 처리
+      - name: Handle push event
+        if: github.event_name == 'push'
+        run: |
+          echo "📤 Push 이벤트 처리"
+          echo "커밋 메시지: ${{ github.event.head_commit.message }}"
+          echo "커밋 작성자: ${{ github.event.head_commit.author.name }}"
+
+      # Pull Request 이벤트 처리
+      - name: Handle pull request event
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "📝 Pull Request 이벤트 처리"
+          echo "PR 번호: ${{ github.event.pull_request.number }}"
+          echo "PR 제목: ${{ github.event.pull_request.title }}"
+          echo "PR 액션: ${{ github.event.action }}"
+
+      # Workflow Dispatch 이벤트 처리
+      - name: Handle workflow dispatch event
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "👆 수동 실행 이벤트 처리"
+          echo "수동으로 워크플로우가 실행되었습니다"
+
+  # 4. 조건부 작업 실행
+  conditional-tasks:
+    name: 조건부 작업 실행
+    runs-on: ubuntu-latest
+    needs: [event-info, branch-specific, event-type-handling]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # main 브랜치 + push 이벤트 시에만 실행
+      - name: Production deployment
+        if: github.ref_name == 'main' && github.event_name == 'push'
+        run: |
+          echo "🚀 Production 배포 실행"
+          echo "메인 브랜치에 푸시되어 배포를 시작합니다"
+
+      # Pull Request + main 브랜치 시에만 실행
+      - name: PR review checks
+        if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
+        run: |
+          echo "🔍 Main 브랜치 PR 리뷰 체크"
+          echo "코드 리뷰 요구사항 확인 중..."
+
+  # 5. 워크플로우 요약
+  summary:
+    name: 워크플로우 요약
+    runs-on: ubuntu-latest
+    needs: [event-info, branch-specific, event-type-handling, conditional-tasks]
+    # if: always() - 다른 job들이 실패해도 항상 실행되도록 하는 조건
+    if: always()
+
+    steps:
+            - name: Generate workflow summary
+        run: |
+          echo "=== 워크플로우 요약 ==="
+          echo "이벤트: ${{ github.event_name }}"
+          echo "브랜치: ${{ github.ref_name }}"
+          echo "실행자: ${{ github.actor }}"
+
+      - name: Final status
+        run: |
+          echo "워크플로우 실행 완료"
