@@ -12,7 +12,32 @@
 # 3. npm start?
 
 name: first workflow
-on: push
+on:
+  pull_request:
+    # ativity types 다루기
+    # pr이 closed 될때만 action 발생 하도록 설정
+    types: ["closed"]
+    brnack: main
+    path: "src/**"
+    # branches:
+    #  -main # pr을 날리는 merger될 base branch
+
+  # 이벤트 필터링 : push 할때 특정 브런치에만 작동하게 함
+  #push :
+  #branches : [main, develop]
+  #paths:
+  # ! 를 쓸려면 하나 이상의 !없는 경로도 표시해야만 함!
+  #  - "src/**" # 하위에 있는 파일 이 변경되면 워크 플로우 실행
+  # - "!docs/**" # !파일명 |  !는 워크플로우에서 제외
+  # 하나만 제외하려면 path-ignore를 사용!
+  #  path-ignore:
+  # - 'docs/**'
+
+  # 이슈활용하기
+  # 1. 이슈가 열린다.
+  # 2. pr이올라가면 test, lint
+  # 3. 이슈에 해당하는 pr이 닫히면
+  # 4. 이유도 닫힌다. ?
 jobs:
   # job의 이름
 

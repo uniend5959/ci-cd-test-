@@ -1,0 +1,28 @@
+name: event action
+on:
+  push:
+    path: "src/**"
+  pull_request:
+    branch: "main"
+    types: [colsed]
+jonbs:
+  #job 실행
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      # 코드를 가져오는 git action을 import 해야하지
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: NodeJs
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # 이제 페키지 js 가져오기
+      - name: npm Ci
+        run: npm ci
+
+      # 이제 lint 하기
+      - name: lint
+        run: npm run lint

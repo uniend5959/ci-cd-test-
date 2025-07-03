@@ -31,7 +31,7 @@ Node.js 프로젝트를 위한 기본 CI(Continuous Integration) 워크플로우
   2. "Setup Node.js" - Node.js 18 설정
   3. "Install dependencies" - 의존성 설치
   4. "Run tests" - 테스트 실행
-  5. "Build project" - 프로젝트 빌드
+  5. "Build project" - - 프로젝트 빌드
 
 ### 3단계: 액션 사용
 
