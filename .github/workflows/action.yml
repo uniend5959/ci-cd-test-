@@ -11,14 +11,12 @@
 # 2. npm i
 # 3. npm start?
 
-#extens에 린팅을 도와주는 게 있음
-# 들여쓰기가 중요
 name: first workflow
-on: push # 이벤트 트리거 #자동화도 아무때나 되면 안됨, 언제 실행이 됐으면 좋겠는지를 정하는 것
-jobs: # job을 작성
-  hello_world:
-    runs-on: ubuntu-latest #워크 플로우가 실행되는 가상환경을 설정 dock?  git 이랑 무슨 관계지 하면 독크를 참고할것
-    steps: # job을 실행하기위한 스텝
-      - name: Hello World # 스텝의 이름
-        run: echo "Hello, World!" # 실제로 실행되는 라인  cli 명령어를 실행하기 위해 쓴다.
-
+on: push
+jobs:
+  # job의 이름
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: hello world
+        run: echo 'hello wold'
