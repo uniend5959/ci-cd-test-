@@ -15,6 +15,24 @@ name: first workflow
 on: push
 jobs:
   # job의 이름
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: chekout code
+        uses: actions/checkout@v4
+
+      - name: install nodeJs
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: install dependencies
+        run: npm ci
+
+      - name: run lint
+        run: npm run lint
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -29,7 +47,15 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4 # actions : 재사용 가능한, 반복되는 작업들을 npm처럼
 
+      - name: install nodeJs
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
       # package-lock.json 파일을 기반으로 프로젝트 의존성(dependency)들을 빠르고 안정적으로 설치하는 단계입니다.
       # 'deps'는 'dependencies'(의존성)의 줄임말
       - name: install deps
         run: npm ci # ci
+
+      - name: run build
+        run: npm run build
