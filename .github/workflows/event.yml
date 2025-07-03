@@ -1,6 +1,7 @@
 name: event action
 on:
   push:
+    #  src 경로에 있을때만 이벤트 발생하도록
     path: "src/**"
   pull_request:
     branch: "main"
@@ -14,7 +15,7 @@ jonbs:
       - name: checkout
         uses: actions/checkout@v4
 
-      - name: NodeJs
+      - name: npm NodeJs
         uses: actions/setup-node@v4
         with:
           node-version: "22"
