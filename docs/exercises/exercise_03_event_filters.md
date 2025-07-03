@@ -1,6 +1,6 @@
 # 실습 7: Event Filters와 Activity Types
 
-## 목표
+## 오늘의 목표
 
 GitHub Actions의 event filter와 activity type을 활용하여 워크플로우를 더 효율적으로 제어하는 방법을 학습합니다.
 

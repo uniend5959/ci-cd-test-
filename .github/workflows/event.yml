@@ -2,11 +2,11 @@ name: event action
 on:
   push:
     #  src 경로에 있을때만 이벤트 발생하도록
-    path: "src/**"
+    paths: "src/**"
   pull_request:
-    branch: "main"
-    types: [colsed]
-jonbs:
+    branches: "main"
+    types: [closed]
+jobs:
   #job 실행
   lint:
     runs-on: ubuntu-latest
