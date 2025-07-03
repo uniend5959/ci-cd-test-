@@ -1,10 +1,14 @@
 name: context ci
 on:
   push:
-
+  pull_request:
 jobs:
   basicContext:
     runs-on: ubuntu-latest
     steps:
       - name: info
-        run: echo ' main 정보 ${{ toJson(github) }}'
+        run: |
+          echo  ` 저장소 이름 ${{ github.repository }}`
+          echo ` 브런치 이름 ${{ github.ref_name }}`
+          echo   '커밋 해쉬 ${{ github.sha }}'
+          echo '이벤트 타입${{ github.event_name }}'
