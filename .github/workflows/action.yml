@@ -1,8 +1,25 @@
+# yml을 자주 쓰는 확장자 
+# key / value 형식으로 이루어져있음 
+# tabdmfh rnqnsgka 
+# 워크플로우 -> 자동화 할 작업의 설계서  --> action.yml 그 자체 
+# jobs :  작업 단위 ( 테스트 시켜줘, 빌드시켜줘, 이슈 닫아줘 )
+# 워크플로우 > job이란작업단위가 있음 
+# 실행환경 : git 회사의 가상 환경 , 내 코드를 git은 모름 
+# step: job > step 이 포함되어있음 
+# job(작업단위)가 실행되기 위해서 완수해야할 단계(step)
+# 1. 코드를 colone
+# 2. npm i 
+# 3. npm start? 
+
+#extens에 린팅을 도와주는 게 있음 
+# 들여쓰기가 중요 
 name: first workflow
-on: [push, workflow_dispatch]
-jobs:
+on: push # 이벤트 트리거 #자동화도 아무때나 되면 안됨, 언제 실행이 됐으면 좋겠는지를 정하는 것 
+jobs: # job을 작성
   hello_world:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Hello World
-        run: echo "Hello, World!"
+    runs-on: ubuntu-latest #워크 플로우가 실행되는 가상환경을 설정 dock?  git 이랑 무슨 관계지 하면 독크를 참고할것 
+    steps: # job을 실행하기위한 스텝 
+      - name: Hello World # 스텝의 이름 
+        run: echo "Hello, World!" # 실제로 실행되는 라인  cli 명령어를 실행하기 위해 쓴다. 
+        
+
