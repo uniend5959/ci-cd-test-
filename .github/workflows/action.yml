@@ -1,0 +1,9 @@
+name: Environment Variables
+on: push
+jobs:
+  print:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Default
+        run: |
+          echo '%{{}}'
