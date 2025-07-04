@@ -1,0 +1,60 @@
+name: Dev To Main PR Workflow
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - develop
+  workflow_dispatch:
+
+jobs:
+  lint-test-build:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - name: Check Out Code
+        uses: actions/checkout@v4
+
+        # 선택사항
+      - name: SetUp Nodejs
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Deps
+        run: npm ci
+
+      - name: Run Linting
+        run: npm run lint
+
+      - name: Run Test
+        run: npm run test
+
+      - name: Run Build
+        run: npm run build
+
+  create-pr:
+    name: Create PR To Main
+    needs: lint-test-build
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - name: Checkout Codes
+        uses: actions/checkout@v4
+
+      - name: Get Last Commit Meessage
+        id: commit-message
+        run: echo "msg=$(git log -1 --pretty=%B) >> $GITHUB_OUTPUT"
+
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.CICD }}
+          base: main
+          branch: ${{github.ref}}
+          title: ${{ steps.commit-message.outputs.msg }}
+          body: |
+            ## PR 요약
+            ### 사전 점검 완료
+            - ✅ Linting
+            - ✅ Unit Tests  
+            - ✅ Build Process

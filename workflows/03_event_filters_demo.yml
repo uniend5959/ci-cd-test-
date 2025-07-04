@@ -11,6 +11,8 @@ on:
       - "package.json"
       - "package-lock.json"
       - "!docs/**" # docs 폴더는 제외
+      
+      
 
   # 2. Pull Request 이벤트
   pull_request:

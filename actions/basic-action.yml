@@ -1,0 +1,64 @@
+name: first workflow
+on: push
+jobs:
+  # job 이름
+  # npm run lint
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: install nodejs
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: install dependencies
+        run: npm ci
+
+      - name: run lint
+        run: npm run lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: install nodejs
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: install dependencies
+        run: npm ci
+
+      - name: run test
+        run: npm run test
+
+  # lint -> build
+  build:
+    runs-on: ubuntu-latest
+
+    # builb job 이전에 lint job이 선행되어야함.
+    # 순차적으로 실행이 되어야함
+    # 단일 선행작업 -> needs: <job name>
+    # 복수 선행작업 -> needs: [ <job name 1> , <job name 2> ... ]
+    needs: [lint, test]
+    steps:
+      # 레포지토리 -> 가상환경으로 코드 가져오기
+      - name: Checkout Code
+        uses: actions/checkout@v4 # actions -> 재사용가능한 작업
+
+        # 노드 버전을 맞춰야할 경우에 가상환경에 노드를 추가 설치
+      - name: install nodejs
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: install deps
+        run: npm ci # ci -> clean install -> package-lock.json
+
+      - name: run build
+        run: npm run build

@@ -34,8 +34,8 @@
 
 1. **기본 Context 출력**
 
-   - 저장소 이름, 브랜치 이름, 커밋 해시 출력
-   - 이벤트 타입과 실행자 정보 출력
+   - 저장소 이름:repository , 브랜치 이름: ref_name, 커밋 해시 출력 event.commits.message
+   - 이벤트 타입 event_name 과 실행자 정보 출력
 
 2. **브랜치별 다른 동작**
 
