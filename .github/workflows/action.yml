@@ -6,4 +6,6 @@ jobs:
     steps:
       - name: Default
         run: |
-          echo '%{{}}'
+          echo  "레퍼지토리 : $GITHUB_REPOSITORY"
+          echo "퍼지토리 : $GITHUB_SHA"
+          echo "레퍼지토리 : $GITHUB_REF"
